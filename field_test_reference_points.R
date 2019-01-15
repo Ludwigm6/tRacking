@@ -7,15 +7,16 @@ library(rgdal)
 source(paste0(s$here, "compare_funs.R"))
 source(paste0(s$here, "srvMapFuncs_modified.R"))
 
-refpos <- readOGR(paste0(p$reference_position$here, "Position.shp"))
+refpos <- shapefile(paste0(p$reference_position$here, "Position.shp"))
 
 # only field data
-refpos <- refpos[1:18,]
+refpos <- refpos[-c(1:18),]
+refpos <- refpos[1:17,]
 
 
 # some additional data conversation etc.
 refpos@data$date <- "2018-11-29"
-refpos@data$timestamp <- as.POSIXct(paste(refpos@data$date, refpos@data$Zeit), format = "%Y-%m-%d %H:%M:%S", tz = "UTC") + hrs(2)
+refpos@data$timestamp <- as.POSIXct(paste(refpos@data$date, refpos@data$Zeit), format = "%Y-%m-%d %H:%M:%S", tz = "CET") + hrs(2)
 refpos <- spTransform(refpos, CRS("+proj=longlat +datum=WGS84"))
 
 pos <- as.data.frame(refpos)
