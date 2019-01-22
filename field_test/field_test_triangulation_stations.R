@@ -35,7 +35,7 @@ for(i in seq(3)){
   triangulations <- na.omit(triangulate(receiver_data, na.omit(b), 
                                         time_error_inter_station = 2,
                                         only_one = F,
-                                        angles_allowed = c(50,100),
+                                        angles_allowed = c(50,150),
                                         tm_method = "tm",
                                         tri_option = "two_strongest",
                                         spar = 0.1, 
@@ -45,9 +45,3 @@ for(i in seq(3)){
   
   
 }
-
-
-
-
-
-

@@ -75,6 +75,15 @@ dev.off()
 
 # different stations
 #-----------------------------------
+tri_st <- lapply(list.files(p$triangulations$stations$here, full.names = TRUE, pattern = ".RDS$"), readRDS)
+tri_nm <- list.files(p$triangulations$stations$here, full.names = FALSE, pattern = ".RDS$")
+tri_st <- lapply(tri_st, function(x){ref_distance(x,reference)})
+for(i in seq(length(tri_st))){tri_st[[i]]$stations <- tri_nm[i]}
+tri_st <- do.call(rbind, tri_st)
+
+
+
+
 
 
 
