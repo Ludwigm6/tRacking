@@ -4,6 +4,8 @@ p <- getEnvi("/home/hanna/rteu/data/")
 s <- getEnvi("/home/hanna/rteu/scripts/")
 
 library(rgdal)
+library(geosphere)
+library(raster)
 source(paste0(s$here, "compare_funs.R"))
 source(paste0(s$here, "srvMapFuncs_modified.R"))
 
@@ -33,6 +35,18 @@ pos$end <- pos$timestamp
 # add method marker (r = rest, m = moving)
 pos$method <- "r"
 pos$method[grepl("m", pos$name)] <- "m"
+
+# add angles to each station
+stations <- readRDS(paste0(p$logger_data_feldtest$here, "stations.RDS"))
+stations <- stations[c(1,5,9,13),]
+
+# function for bearing angle as the dfference from north, clockwise
+
+
+
+
+
+
 
 saveRDS(pos, paste0(p$reference_position$here, "field_test_reference_points.RDS"))
 

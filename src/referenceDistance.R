@@ -1,4 +1,4 @@
-# distance from triangulation point to reference point
+#' distance from triangulation point to reference point
 
 library(lubridate)
 library(raster)

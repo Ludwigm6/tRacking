@@ -35,13 +35,13 @@ for(i in seq(3)){
   triangulations <- na.omit(triangulate(receiver_data, na.omit(b), 
                                         time_error_inter_station = 2,
                                         only_one = F,
-                                        angles_allowed = c(50,150),
+                                        angles_allowed = c(5,175),
                                         tm_method = "tm",
                                         tri_option = "two_strongest",
                                         spar = 0.1, 
                                         progress = F))
   
-  saveRDS(triangulations, paste0(p$triangulations$stations$here, "field_test_triangulation_s_", sc[1,i], "_", sc[2,i], ".RDS"))
+  saveRDS(triangulations, paste0(p$triangulations$stations$here, "field_test_triangulation_all_angles_s_", sc[1,i], "_", sc[2,i], ".RDS"))
   
   
 }
