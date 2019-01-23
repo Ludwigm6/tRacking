@@ -40,13 +40,23 @@ pos$method[grepl("m", pos$name)] <- "m"
 stations <- readRDS(paste0(p$logger_data_feldtest$here, "stations.RDS"))
 stations <- stations[c(1,5,9,13),]
 
-# function for bearing angle as the dfference from north, clockwise
+source(paste0(s$tRacking$src$here, "bearingAngle.R"))
 
+pos$bearing_f1 <- be(y = pos$pos.utm.Y - stations$pos.utm.Y[1],
+                     x = pos$pos.utm.X - stations$pos.utm.X[1])
 
+pos$bearing_f3 <- be(y = pos$pos.utm.Y - stations$pos.utm.Y[2],
+                     x = pos$pos.utm.X - stations$pos.utm.X[2])
 
-
+pos$bearing_f4 <- be(y = pos$pos.utm.Y - stations$pos.utm.Y[3],
+                     x = pos$pos.utm.X - stations$pos.utm.X[3])
 
 
 
 saveRDS(pos, paste0(p$reference_position$here, "field_test_reference_points.RDS"))
+
+
+
+
+
 
