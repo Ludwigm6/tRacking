@@ -1,8 +1,4 @@
 # bearings function
-receiver_data <- read.csv(paste0(p$reference_points$here, "antennas.csv"))
-logger_data <- read_logger_folder(p$logger_data$log_fieldtest$here)
-logger_data$timestamp <- as.POSIXct(logger_data$timestamp, origin = "1970-01-01", tz = "UTC")
-
 calc_bearings <- function(logger_data, receiver_data, function_path, FOI = 150203){
   library(doParallel)
   source(paste0(function_path, "srvFileIO_reverse.R"))

@@ -1,11 +1,14 @@
 # formating of gps reference points
 #-----------------------------
+library(rgdal)
+library(raster)
+
 source("~/repositories/envimaR/R/getEnvi.R")
 p <- getEnvi("/home/marvin/rteu/field_test/data/")
-s <- getEnvi("/home/marvin/rteu/scripts/")
+s <- getEnvi("/home/marvin/rteu/field_test/scripts/")
 
 # load gps source
-ref <- read.table(paste0(p$reference_points$here, "field_test.txt"), sep = ",", header = TRUE)
+ref <- read.table(paste0(p$gps_data$here, "gps_raw_export.txt"), sep = ",", header = TRUE)
 ref$X <- NULL
 ref$Basis.Ant.H. <- NULL
 ref$Basis <- NULL
@@ -34,8 +37,8 @@ ref <- data.frame(name = as.character(ref$Name),
                   utm_o = ref$Punkt.Ost.O,
                   utm_n = ref$Punkt.Nord.N,
                   utm_z = ref$Punkt.Z.Z,
-                  wgs_o = ref$Punkt.Brg.,
-                  wgs_n = ref$Punkt.Läg.,
+                  wgs_o = ref$Punkt.Läg.,
+                  wgs_n = ref$Punkt.Brg.,
                   code = ref$Code,
                   time_start = ref$timestamp_start,
                   time_end = ref$timestamp_end,
@@ -54,16 +57,64 @@ ref$method[substr(ref$location,1,1) == "M"] <- gsub('[[:digit:]]+', '',
                                                     substr(ref$name,2,nchar(ref$name))[substr(ref$location,1,1) == "M"])
 
 
+# first five entries were a deprecated test run, remove them
+ref <- ref[-1:-5,]
+
 # save
-write.csv(ref, paste0(p$reference_points$here, "reference_points.csv"), row.names = FALSE)
+write.csv(ref, paste0(p$gps_data$here, "reference_points.csv"), row.names = FALSE)
 
 
-# filter methods
-#--------------------------------
-ruhe <- ref[ref$method == "RUHE",]
-ruhe <- ruhe[-1:-5,]
 
-write.csv(ruhe, paste0(p$reference_points$here, "ruhe_points.csv"), row.names = FALSE)
+#----------------------------------------------------------
+
+# create LUT for start and end per measure point
+library(lubridate)
+
+lut_times <- aggregate.data.frame(ref$time_start,
+                                  by = list(location = ref$location, method = ref$method),
+                                  FUN = min)
+
+colnames(lut_times) <- c("location", "method", "start")
+
+lut_times$end <- aggregate.data.frame(ref$time_start,
+                                    by = list(location = ref$location, method = ref$method),
+                                    FUN = max)$x
+
+lut_times$start <- with_tz(lut_times$start, "UTC")
+lut_times$end <- with_tz(lut_times$end, "UTC")
+
+
+lut_times$id <- paste0(lut_times$location, "_", lut_times$method)
+
+# location of the points
+lut_times$pos.X <-  aggregate.data.frame(ref$wgs_o,
+                                         by = list(location = ref$location, method = ref$method),
+                                         FUN = mean)$x
+lut_times$pos.Y <-  aggregate.data.frame(ref$wgs_n,
+                                         by = list(location = ref$location, method = ref$method),
+                                         FUN = mean)$x
+lut_times$pos.utm.X <- aggregate.data.frame(ref$utm_o,
+                                            by = list(location = ref$location, method = ref$method),
+                                            FUN = mean)$x
+lut_times$pos.utm.Y <- aggregate.data.frame(ref$utm_n,
+                                            by = list(location = ref$location, method = ref$method),
+                                            FUN = mean)$x
+
+# bearing angles to the antennas
+source(paste0(s$tRacking$src$here, "point_bearings.R"))
+
+antennas <- read.csv(paste0(p$gps_data$here, "antennas.csv"))
+antennas <- antennas[c(1,5,9),]
+
+lut_times$bearing_s1 <- be(lut_times$pos.Y - antennas$Latitude[1], lut_times$pos.X - antennas$Longitude[1])
+lut_times$bearing_s2 <- be(lut_times$pos.Y - antennas$Latitude[2], lut_times$pos.X - antennas$Longitude[2])
+lut_times$bearing_s3 <- be(lut_times$pos.Y - antennas$Latitude[3], lut_times$pos.X - antennas$Longitude[3])
+
+# save
+write.csv(lut_times, paste0(p$gps_data$here, "lut_measures.csv"), row.names = FALSE)
+saveRDS(lut_times, paste0(p$gps_data$here, "lut_measures.RDS"))
+
+
 
 
 
