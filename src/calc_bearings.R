@@ -13,13 +13,13 @@ calc_bearings <- function(logger_data, receiver_data, function_path, FOI = 15020
   
   # time match signals
   # station_time_error = maximal error between two stations
-  tm_signals <- time_match_signals(logger_data, station_time_error = 1)
+  tm_signals <- time_match_signals(logger_data, station_time_error = 0.3)
   
   
   # calculate bearings
   # dBLoss -> signal difference to same antenna rotated 90 degree
   registerDoParallel(cores=detectCores())
-  bearings <- doa(tm_signals, receiver_data, dBLoss = 17)
+  bearings <- doa(tm_signals, receiver_data, dBLoss = 14)
   bearings$timestamp <- as.POSIXct(bearings$timestamp, origin = "1970-01-01", tz = "UTC")
   stopImplicitCluster()
   

@@ -1,5 +1,5 @@
 
-
+library(plyr)
 
 source("~/repositories/envimaR/R/getEnvi.R")
 p <- getEnvi("/home/marvin/rteu/field_test/data/")
@@ -36,8 +36,8 @@ for(i in seq(nrow(ref))){
   b$id[which(b$timestamp > ref$start[i] & b$timestamp < ref$end[i])]  <- ref$id[i]
 }
 
+b <- join(b, ref, by = "id")
 
-b <- na.omit(b)
 write.csv(b, paste0(p$bearings$here, "bearings.csv"), row.names = FALSE)
 
 
