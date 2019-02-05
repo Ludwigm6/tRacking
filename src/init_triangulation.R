@@ -16,7 +16,7 @@ source(paste0(s$modified$here, "srvMapFuncs_modified.R"))
 source(paste0(s$modified$here, "srvTabBearings_modified.R"))
 
 # load and format bearings
-bearings <- read.csv(paste0(p$bearings$here, "bearings.csv"),stringsAsFactors = FALSE)
+bearings <- readRDS(paste0(p$bearings$here, "bearings.RDS"))
 bearings$timestamp <- as.POSIXct(bearings$timestamp, tz = "UTC")
 bearings$start <- as.POSIXct(bearings$start, tz = "UTC")
 bearings$end <- as.POSIXct(bearings$end, tz = "UTC")
