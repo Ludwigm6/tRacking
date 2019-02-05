@@ -6,52 +6,75 @@ p <- getEnvi("/home/marvin/rteu/field_test/data/")
 s <- getEnvi("/home/marvin/rteu/field_test/scripts/")
 
 
-b <- read.csv(paste0(p$bearings$here, "bearings.csv"), stringsAsFactors = FALSE)
-b$timestamp <- as.POSIXct(b$timestamp, tz = "UTC")
+b <- readRDS(paste0(p$bearings$here, "bearings_calibration.RDS"))
 
-# remove WALK for now
-b <- na.omit(b)
+# only ruhe points
 b <- b[b$method == "RUHE",]
-
-# calculate angle error
-b$angle_error <- 0
-
-# min angle function
-min_angle <- function(a1, a2){
-  180 - abs(abs(a1 - a2) - 180)
-}
-
-b$angle_error[b$Station == "S1"] <- min_angle(b$angle[b$Station == "S1"], b$bearing_s1[b$Station == "S1"])
-b$angle_error[b$Station == "S2"] <- min_angle(b$angle[b$Station == "S2"], b$bearing_s2[b$Station == "S2"])
-b$angle_error[b$Station == "S3"] <- min_angle(b$angle[b$Station == "S3"], b$bearing_s3[b$Station == "S3"])
-
-
-b$antennas <- as.factor(b$antennas)
 
 
 # bearings angle error ~ antennas
+#-----------------------------------------------------
 
-pdf(paste0(p$results$here, "bearing_error_ruhe.pdf"), width = 10, height = 4)
-ggplot(b, aes(y = angle_error, group = antennas, x = antennas))+
+pdf(paste0(p$results$here, "bearings_antennas.pdf"), width = 8, height = 6)
+ggplot(b[b$calibration == "yes",], aes(y = angle_error, group = antennas, x = antennas))+
   geom_boxplot()+
-  scale_x_discrete(name = "Antennas", labels = c("1","2","3","4"))+
-  scale_y_continuous(name = "Angle difference [°]", expand = c(0.01,0.01))+
-  theme_classic()+theme(panel.grid.minor = element_blank())+
-  coord_flip()
+  scale_x_discrete(name = "Number of antennas per station", labels = c("1","2","3","4"))+
+  scale_y_continuous(name = "Angle error [°]", breaks = seq(0,180,10))+
+  theme(panel.background = element_blank(), panel.grid = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank())
+
 dev.off()
 
 
-# bearing angle error ~ station
-# only with antennas > 1
 
-pdf(paste0(p$results$here, "bearing_error_station.pdf"), width = 10, height = 4)
-ggplot(b[b$Station != 1,], aes(y = angle_error, group = Station, x = Station))+
+# remove bearings with only 1 or 2 antennas
+b <- b[as.numeric(b$antennas) > 1,]
+
+# check what the calibration did
+#----------------------------------------------
+pdf(paste0(p$results$here, "bearings_station_calibration.pdf"), width = 8, height = 6)
+
+ggplot(b, aes(y = angle_error, x = Station, fill = calibration))+
   geom_boxplot()+
-  scale_x_discrete(name = "Station", labels = c("S1","S2","S3"))+
-  scale_y_continuous(name = "Angle difference [°]", expand = c(0.01,0.01))+
-  theme_classic()+theme(panel.grid.minor = element_blank())+
-  coord_flip()
+  scale_fill_grey(start = 0.7, end = 1, guide = FALSE)+
+  scale_x_discrete(name = NULL)+
+  scale_y_continuous(name = "Angle error [°]", breaks = seq(0,180,10))+
+  theme(panel.background = element_blank(), panel.grid = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank())
+
 dev.off()
+
+
+ggplot(b[b$calibration == "yes" & b$Station == "S3",], aes(y = angle_error, x = location))+
+  geom_boxplot()
+
+
+
+# different dbLOSS
+#-----------------------------------------------------------
+
+b <- readRDS(paste0(p$bearings$here, "bearings_dbloss.RDS"))
+
+b <- b[b$method == "RUHE",]
+b <- b[as.numeric(b$antennas) > 1,]
+
+pdf(paste0(p$results$here, "bearings_dbloss.pdf"), width = 12, height = 6)
+ggplot(b, aes(y = angle_error, x = dbloss, group = dbloss))+
+  geom_boxplot()+
+  scale_x_continuous(name = "db Loss", breaks = seq(1,25))+
+  scale_y_continuous(name = "Angle error [°]", breaks = seq(0,180,10))+
+    theme(panel.background = element_blank(), panel.grid = element_line(color = "grey80"),
+          panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank())
+dev.off()
+
+
+
+
+
+
+
+
+
 
 
 
